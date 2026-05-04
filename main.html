@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Boomerang — ROI Estimator</title>
+<title>Boomerang — Shared Asset ROI Estimator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +31,7 @@
     --c-wages: #7F77DD;
     --c-insurance: #D85A30;
     --c-premium: #BA7517;
+    --c-management: #3C7E99;
     --c-revenue: #1D9E75;
   }
 
@@ -61,14 +62,12 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ─── Layout ─── */
   .app {
     max-width: 480px;
     margin: 0 auto;
     padding: 0 0 60px;
   }
 
-  /* ─── Header ─── */
   .header {
     background: var(--brand-dark);
     padding: 48px 24px 32px;
@@ -135,14 +134,12 @@
 
   .header p {
     font-size: 14px;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.65);
     line-height: 1.5;
   }
 
-  /* ─── Content padding ─── */
   .content { padding: 24px 16px 0; }
 
-  /* ─── Section labels ─── */
   .section-label {
     font-size: 11px;
     font-weight: 500;
@@ -153,7 +150,6 @@
     padding-left: 2px;
   }
 
-  /* ─── Cards ─── */
   .card {
     background: var(--card-bg);
     border: 0.5px solid var(--border);
@@ -166,13 +162,24 @@
 
   .card-inner { padding: 16px 18px; }
 
-  /* ─── Input rows ─── */
+  .intro-card {
+    background: var(--accent-light);
+    border-color: rgba(186,117,23,0.25);
+  }
+
+  .intro-card p {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
   .input-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 10px 0;
     border-bottom: 0.5px solid var(--border);
+    gap: 14px;
   }
 
   .input-row:last-child { border-bottom: none; }
@@ -229,47 +236,53 @@
 
   input[type="number"]:focus { border-color: var(--brand); }
 
-  /* ─── Time selector ─── */
-  .time-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px;
     margin-bottom: 16px;
+    box-shadow: var(--shadow);
   }
 
-  .time-btn {
-    padding: 12px 6px;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
+  .tab-btn {
+    flex: 1;
+    padding: 9px 6px;
+    border: none;
+    border-radius: 7px;
     font-size: 13px;
     font-weight: 500;
     font-family: 'DM Sans', sans-serif;
-    background: var(--card-bg);
     color: var(--muted);
+    background: transparent;
     cursor: pointer;
-    transition: all 0.18s;
-    text-align: center;
-    line-height: 1.2;
+    transition: all 0.15s;
   }
 
-  .time-btn .months { display: block; font-size: 18px; font-weight: 500; color: var(--text); }
-  .time-btn .unit { display: block; font-size: 10px; color: var(--muted); margin-top: 1px; }
-
-  .time-btn:hover { border-color: var(--brand); }
-
-  .time-btn.active {
-    background: var(--brand-light);
-    border-color: var(--brand);
-    color: var(--brand-dark);
+  .tab-btn.active {
+    background: var(--brand);
+    color: #fff;
   }
 
-  .time-btn.active .months,
-  .time-btn.active .unit { color: var(--brand-dark); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
-  /* ─── Divider ─── */
-  .divider { height: 0.5px; background: var(--border); margin: 4px 0; }
+  .cta-btn {
+    width: 100%;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    background: var(--brand);
+    border: 1px solid var(--brand);
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
 
-  /* ─── Results section ─── */
   .results-header {
     display: flex;
     align-items: center;
@@ -286,7 +299,6 @@
     font-weight: 500;
   }
 
-  /* ─── Stat grid ─── */
   .stat-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -320,87 +332,6 @@
     font-weight: 400;
   }
 
-  /* ─── Breakdown card ─── */
-  .breakdown-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 11px 18px;
-    border-bottom: 0.5px solid var(--border);
-  }
-
-  .breakdown-row:last-child { border-bottom: none; }
-
-  .br-label {
-    font-size: 13px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .br-label.strong {
-    font-weight: 500;
-    color: var(--text);
-    font-size: 14px;
-  }
-
-  .color-dot {
-    width: 9px; height: 9px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-
-  .br-val {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .br-val.positive { color: var(--brand-dark); }
-  .br-val.negative { color: #A32D2D; }
-
-  /* ─── Stacked bar ─── */
-  .bar-container { padding: 14px 18px 0; }
-
-  .bar-track {
-    height: 10px;
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    gap: 2px;
-    background: var(--border);
-  }
-
-  .bar-seg {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.4s cubic-bezier(.4,0,.2,1);
-    min-width: 2px;
-  }
-
-  .bar-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-    padding: 10px 18px 16px;
-  }
-
-  .leg-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .leg-swatch {
-    width: 10px; height: 10px;
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-
-  /* ─── ROI hero ─── */
   .roi-box {
     background: var(--brand-dark);
     border-radius: var(--radius);
@@ -458,22 +389,63 @@
 
   .roi-sub {
     font-size: 12px;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.55);
     position: relative;
     z-index: 1;
   }
 
-  /* ─── Trips note ─── */
-  .trips-note {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    padding: 0 16px;
-    line-height: 1.5;
-    margin-top: -4px;
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 18px;
+    border-bottom: 0.5px solid var(--border);
+    gap: 14px;
   }
 
-  /* ─── Scenario comparison ─── */
+  .breakdown-row:last-child { border-bottom: none; }
+
+  .br-label {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .br-label.strong {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .color-dot {
+    width: 9px; height: 9px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .br-val {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .br-val.positive { color: var(--brand-dark); }
+  .br-val.negative { color: #A32D2D; }
+
+  .formula-card code {
+    display: block;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: var(--text);
+  }
+
   .scenario-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -512,41 +484,6 @@
   .sc-pct.up { color: var(--brand); }
   .sc-pct.down { color: #A32D2D; }
 
-  /* ─── Tabs ─── */
-  .tab-bar {
-    display: flex;
-    gap: 0;
-    background: var(--card-bg);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
-  }
-
-  .tab-btn {
-    flex: 1;
-    padding: 9px 6px;
-    border: none;
-    border-radius: 7px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .tab-btn.active {
-    background: var(--brand);
-    color: #fff;
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ─── Footer ─── */
   .footer {
     text-align: center;
     padding: 24px 16px 0;
@@ -554,25 +491,14 @@
     color: var(--muted);
   }
 
-  /* ─── Animations ─── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .content > * {
-    animation: fadeUp 0.4s ease both;
-  }
+  .content > * { animation: fadeUp 0.4s ease both; }
 
-  .content > *:nth-child(1) { animation-delay: 0.05s; }
-  .content > *:nth-child(2) { animation-delay: 0.10s; }
-  .content > *:nth-child(3) { animation-delay: 0.15s; }
-  .content > *:nth-child(4) { animation-delay: 0.20s; }
-  .content > *:nth-child(5) { animation-delay: 0.25s; }
-
-  .update-flash {
-    animation: flash 0.3s ease;
-  }
+  .update-flash { animation: flash 0.3s ease; }
 
   @keyframes flash {
     0%   { opacity: 1; }
@@ -580,7 +506,6 @@
     100% { opacity: 1; }
   }
 
-  /* ─── Responsive ─── */
   @media (min-width: 480px) {
     body { padding-top: 20px; }
     .app { border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-lg); }
@@ -591,7 +516,6 @@
 <body>
 <div class="app">
 
-  <!-- Header -->
   <div class="header">
     <div class="logo-row">
       <div class="logo-icon">
@@ -603,173 +527,191 @@
       <span class="brand-name">Boomerang</span>
     </div>
     <div class="header-text">
-      <h1>ROI Estimator</h1>
-      <p>See your projected return on shared vehicle investment, before you commit.</p>
+      <h1>Shared Asset ROI Estimator</h1>
+      <p>Estimate your return from a vehicle based on trips, operating costs, and your investment share.</p>
     </div>
   </div>
 
-  <!-- Content -->
   <div class="content">
 
-    <!-- Tab navigation -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('inputs')">Inputs</button>
       <button class="tab-btn" onclick="switchTab('results')">Results</button>
       <button class="tab-btn" onclick="switchTab('scenarios')">Scenarios</button>
     </div>
 
-    <!-- ── TAB: Inputs ── -->
     <div class="tab-panel active" id="tab-inputs">
 
-      <p class="section-label">Your investment</p>
+      <div class="card intro-card">
+        <div class="card-inner">
+          <p>Boomerang pools investor capital into income-generating vehicles. This calculator estimates your share of profit based on your investment percentage and the vehicle’s projected performance.</p>
+        </div>
+      </div>
+
+      <p class="section-label">Step 1 · Your investment</p>
       <div class="card">
         <div class="card-inner">
           <div class="input-row">
-            <span class="input-label">Investment amount</span>
+            <span class="input-label">
+              <strong>How much do you want to invest?</strong>
+              <span>Minimum suggested investment is R10,000</span>
+            </span>
             <div class="input-wrap">
               <span class="prefix">R</span>
-              <input type="number" id="invest" value="50000" min="1000" step="1000">
+              <input type="number" id="invest" value="50000" min="10000" step="1000">
             </div>
           </div>
           <div class="input-row">
-            <span class="input-label">Vehicle total value</span>
+            <span class="input-label">
+              <strong>Vehicle value</strong>
+              <span>Total value of the vehicle asset</span>
+            </span>
             <div class="input-wrap">
               <span class="prefix">R</span>
-              <input type="number" id="vehicle" value="300000" min="10000" step="5000">
+              <input type="number" id="vehicle" value="335000" min="10000" step="5000">
             </div>
           </div>
         </div>
       </div>
 
-      <p class="section-label">Time horizon</p>
-      <div class="time-grid">
-        <button class="time-btn" data-m="1"><span class="months">1</span><span class="unit">month</span></button>
-        <button class="time-btn" data-m="3"><span class="months">3</span><span class="unit">months</span></button>
-        <button class="time-btn active" data-m="6"><span class="months">6</span><span class="unit">months</span></button>
-        <button class="time-btn" data-m="12"><span class="months">12</span><span class="unit">months</span></button>
-      </div>
-
-      <p class="section-label">Monthly expenses</p>
+      <p class="section-label">Step 2 · Vehicle activity</p>
       <div class="card">
         <div class="card-inner">
           <div class="input-row">
             <span class="input-label">
-              <strong>Fuel</strong>
-              <span>Monthly fuel cost</span>
+              <strong>If the vehicle does this many trips in 3 months</strong>
+              <span>Base minimum: 100 trips per quarter</span>
             </span>
             <div class="input-wrap">
-              <span class="prefix">R</span>
-              <input type="number" id="fuel" value="8000" min="0" step="500">
+              <input type="number" id="trips" value="100" min="100" step="10" style="width:90px">
             </div>
           </div>
           <div class="input-row">
             <span class="input-label">
-              <strong>Driver wages</strong>
-              <span>Monthly salary</span>
+              <strong>Average income per trip</strong>
+              <span>Default based on regular mobility rate</span>
             </span>
             <div class="input-wrap">
               <span class="prefix">R</span>
-              <input type="number" id="wages" value="7000" min="0" step="500">
+              <input type="number" id="rate" value="290" min="0" step="10">
             </div>
           </div>
+        </div>
+      </div>
+
+      <p class="section-label">Step 3 · Trip-based costs</p>
+      <div class="card">
+        <div class="card-inner">
+          <div class="input-row">
+            <span class="input-label">
+              <strong>Fuel per trip</strong>
+              <span>Calculated as trips × R120</span>
+            </span>
+            <div class="input-wrap">
+              <span class="prefix">R</span>
+              <input type="number" id="fuelPerTrip" value="120" min="0" step="10">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-label">
+              <strong>Salary per trip</strong>
+              <span>Calculated as trips × R70</span>
+            </span>
+            <div class="input-wrap">
+              <span class="prefix">R</span>
+              <input type="number" id="salaryPerTrip" value="70" min="0" step="10">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">Step 4 · Fixed quarterly costs</p>
+      <div class="card">
+        <div class="card-inner">
           <div class="input-row">
             <span class="input-label">
               <strong>Insurance</strong>
-              <span>Monthly premium</span>
+              <span>Total insurance for 3 months</span>
             </span>
             <div class="input-wrap">
               <span class="prefix">R</span>
-              <input type="number" id="insurance" value="3500" min="0" step="100">
+              <input type="number" id="insurance" value="3000" min="0" step="100">
             </div>
           </div>
           <div class="input-row">
             <span class="input-label">
               <strong>Vehicle premium</strong>
-              <span>Loan / lease payment</span>
+              <span>Total vehicle repayment for 3 months</span>
             </span>
             <div class="input-wrap">
               <span class="prefix">R</span>
-              <input type="number" id="premium" value="5000" min="0" step="100">
+              <input type="number" id="premium" value="15000" min="0" step="500">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-label">
+              <strong>Maintenance / other costs</strong>
+              <span>Optional quarterly operating cost</span>
+            </span>
+            <div class="input-wrap">
+              <span class="prefix">R</span>
+              <input type="number" id="other" value="5000" min="0" step="500">
+            </div>
+          </div>
+          <div class="input-row">
+            <span class="input-label">
+              <strong>Management fee</strong>
+              <span>Boomerang fee on profit before investor payout</span>
+            </span>
+            <div class="input-wrap">
+              <input type="number" id="managementFee" value="15" min="0" max="100" step="1" style="width:70px">
+              <span class="prefix">%</span>
             </div>
           </div>
         </div>
       </div>
 
-      <p class="section-label">Monthly revenue & trips</p>
-      <div class="card">
-        <div class="card-inner">
-          <div class="input-row">
-            <span class="input-label">
-              <strong>Monthly revenue</strong>
-              <span>Gross income from trips</span>
-            </span>
-            <div class="input-wrap">
-              <span class="prefix">R</span>
-              <input type="number" id="revenue" value="40000" min="0" step="1000">
-            </div>
-          </div>
-          <div class="input-row">
-            <span class="input-label">
-              <strong>Trips per month</strong>
-              <span>Estimated trip count</span>
-            </span>
-            <div class="input-wrap">
-              <input type="number" id="trips" value="100" min="1" step="10" style="width:90px">
-            </div>
-          </div>
-        </div>
-      </div>
+      <button class="cta-btn" onclick="switchTab('results')">Calculate my return →</button>
 
-      <button class="time-btn active" style="width:100%;border-radius:12px;padding:16px;font-size:15px;font-family:'DM Sans',sans-serif;background:var(--brand);border-color:var(--brand);color:#fff;cursor:pointer;margin-bottom:16px;"
-        onclick="switchTab('results')">
-        View my returns →
-      </button>
+    </div>
 
-    </div><!-- /tab-inputs -->
-
-    <!-- ── TAB: Results ── -->
     <div class="tab-panel" id="tab-results">
 
       <div class="results-header">
-        <p class="section-label" style="margin:0">Projected returns</p>
-        <span class="period-badge" id="period-badge">6 months</span>
+        <p class="section-label" style="margin:0">Projected quarterly return</p>
+        <span class="period-badge">3 months</span>
       </div>
 
       <div class="stat-grid">
         <div class="stat">
           <div class="stat-val" id="r-trips">—</div>
-          <div class="stat-key">Total trips</div>
+          <div class="stat-key">Trips in 3 months</div>
         </div>
         <div class="stat">
           <div class="stat-val" id="r-share">—</div>
-          <div class="stat-key">Your ownership</div>
+          <div class="stat-key">Your asset share</div>
         </div>
         <div class="stat green">
           <div class="stat-val" id="r-profit">—</div>
-          <div class="stat-key">Vehicle net profit</div>
+          <div class="stat-key">Profit after costs</div>
         </div>
         <div class="stat green">
           <div class="stat-val" id="r-myshare">—</div>
-          <div class="stat-key">Your share of profit</div>
+          <div class="stat-key">Your estimated payout</div>
         </div>
       </div>
 
-      <!-- ROI Hero -->
       <div class="roi-box">
-        <div class="roi-label">Your total return on investment</div>
+        <div class="roi-label">Your estimated quarterly return</div>
         <div class="roi-amount" id="roi-amount">—</div>
         <div class="roi-pct" id="roi-pct">— % ROI</div>
-        <div class="roi-sub" id="roi-sub">—</div>
+        <div class="roi-sub" id="roi-sub">Based on your share of the vehicle profit</div>
       </div>
 
-      <!-- Trips note -->
-      <p class="trips-note" id="trips-note" style="margin-bottom:16px"></p>
-
-      <!-- Cost breakdown -->
-      <p class="section-label">Cost breakdown</p>
+      <p class="section-label">Vehicle calculation</p>
       <div class="card">
         <div class="breakdown-row">
-          <span class="br-label"><span class="color-dot" style="background:var(--c-revenue)"></span>Total revenue</span>
+          <span class="br-label"><span class="color-dot" style="background:var(--c-revenue)"></span>Revenue</span>
           <span class="br-val positive" id="b-rev">—</span>
         </div>
         <div class="breakdown-row">
@@ -777,8 +719,8 @@
           <span class="br-val" id="b-fuel">—</span>
         </div>
         <div class="breakdown-row">
-          <span class="br-label"><span class="color-dot" style="background:var(--c-wages)"></span>Driver wages</span>
-          <span class="br-val" id="b-wages">—</span>
+          <span class="br-label"><span class="color-dot" style="background:var(--c-wages)"></span>Salary</span>
+          <span class="br-val" id="b-salary">—</span>
         </div>
         <div class="breakdown-row">
           <span class="br-label"><span class="color-dot" style="background:var(--c-insurance)"></span>Insurance</span>
@@ -788,108 +730,104 @@
           <span class="br-label"><span class="color-dot" style="background:var(--c-premium)"></span>Vehicle premium</span>
           <span class="br-val" id="b-premium">—</span>
         </div>
+        <div class="breakdown-row">
+          <span class="br-label"><span class="color-dot" style="background:var(--muted)"></span>Maintenance / other</span>
+          <span class="br-val" id="b-other">—</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="br-label strong">Profit before management fee</span>
+          <span class="br-val positive" id="b-before-fee">—</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="br-label"><span class="color-dot" style="background:var(--c-management)"></span>Boomerang management fee</span>
+          <span class="br-val" id="b-management">—</span>
+        </div>
         <div class="breakdown-row" style="background:var(--brand-light)">
-          <span class="br-label strong">Net vehicle profit</span>
+          <span class="br-label strong">Distributable vehicle profit</span>
           <span class="br-val positive" id="b-net">—</span>
         </div>
+      </div>
 
-        <!-- Stacked bar -->
-        <div class="bar-container">
-          <div class="bar-track" id="bar-track">
-            <div class="bar-seg" id="bs-rev" style="background:var(--c-revenue)"></div>
-            <div class="bar-seg" id="bs-fuel" style="background:var(--c-fuel)"></div>
-            <div class="bar-seg" id="bs-wages" style="background:var(--c-wages)"></div>
-            <div class="bar-seg" id="bs-ins" style="background:var(--c-insurance)"></div>
-            <div class="bar-seg" id="bs-prem" style="background:var(--c-premium)"></div>
-          </div>
-        </div>
-        <div class="bar-legend">
-          <span class="leg-item"><span class="leg-swatch" style="background:var(--c-revenue)"></span>Revenue</span>
-          <span class="leg-item"><span class="leg-swatch" style="background:var(--c-fuel)"></span>Fuel</span>
-          <span class="leg-item"><span class="leg-swatch" style="background:var(--c-wages)"></span>Wages</span>
-          <span class="leg-item"><span class="leg-swatch" style="background:var(--c-insurance)"></span>Insurance</span>
-          <span class="leg-item"><span class="leg-swatch" style="background:var(--c-premium)"></span>Premium</span>
+      <p class="section-label">Formula</p>
+      <div class="card formula-card">
+        <div class="card-inner">
+          <code id="formula-text">—</code>
         </div>
       </div>
 
-    </div><!-- /tab-results -->
+    </div>
 
-    <!-- ── TAB: Scenarios ── -->
     <div class="tab-panel" id="tab-scenarios">
 
-      <p class="section-label">Conservative vs base vs optimistic</p>
+      <p class="section-label">Trip performance scenarios</p>
       <div class="scenario-grid">
         <div class="scenario-card">
-          <div class="sc-label">Conservative</div>
+          <div class="sc-label">Minimum</div>
           <div class="sc-val" id="sc-low-ret">—</div>
-          <div class="sc-pct down" id="sc-low-pct">—</div>
+          <div class="sc-pct down" id="sc-low-pct">100 trips</div>
         </div>
         <div class="scenario-card base">
-          <div class="sc-label" style="color:var(--brand)">Base case</div>
+          <div class="sc-label" style="color:var(--brand)">Current</div>
           <div class="sc-val" id="sc-base-ret">—</div>
-          <div class="sc-pct up" id="sc-base-pct">—</div>
+          <div class="sc-pct up" id="sc-base-pct">— trips</div>
         </div>
         <div class="scenario-card">
-          <div class="sc-label">Optimistic</div>
+          <div class="sc-label">Strong</div>
           <div class="sc-val" id="sc-high-ret">—</div>
-          <div class="sc-pct up" id="sc-high-pct">—</div>
+          <div class="sc-pct up" id="sc-high-pct">+50 trips</div>
         </div>
       </div>
 
-      <p class="section-label">How we calculate each scenario</p>
+      <p class="section-label">How scenarios work</p>
       <div class="card">
         <div class="card-inner">
           <div class="input-row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px 0">
-            <span style="font-size:13px;color:var(--text);font-weight:500">Conservative</span>
-            <span style="font-size:12px;color:var(--muted)">Revenue −20%, expenses +10%</span>
+            <span style="font-size:13px;color:var(--text);font-weight:500">Minimum</span>
+            <span style="font-size:12px;color:var(--muted)">Uses the minimum base count of 100 trips over 3 months.</span>
           </div>
           <div class="input-row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px 0">
-            <span style="font-size:13px;color:var(--text);font-weight:500">Base case</span>
-            <span style="font-size:12px;color:var(--muted)">Exactly as you entered</span>
+            <span style="font-size:13px;color:var(--text);font-weight:500">Current</span>
+            <span style="font-size:12px;color:var(--muted)">Uses the number of trips entered in the calculator.</span>
           </div>
           <div class="input-row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px 0">
-            <span style="font-size:13px;color:var(--text);font-weight:500">Optimistic</span>
-            <span style="font-size:12px;color:var(--muted)">Revenue +20%, expenses −5%</span>
+            <span style="font-size:13px;color:var(--text);font-weight:500">Strong</span>
+            <span style="font-size:12px;color:var(--muted)">Adds 50 more trips to show upside if the vehicle performs better.</span>
           </div>
         </div>
       </div>
 
-      <p class="section-label">Break-even analysis</p>
+      <p class="section-label">Break-even</p>
       <div class="card">
         <div class="card-inner">
           <div class="input-row">
-            <span class="input-label">Min monthly revenue needed</span>
-            <span class="br-val positive" id="breakeven">—</span>
+            <span class="input-label">Cost per trip before fixed costs</span>
+            <span class="br-val" id="cost-per-trip">—</span>
           </div>
           <div class="input-row">
-            <span class="input-label">Monthly expense total</span>
-            <span class="br-val" id="total-expenses">—</span>
+            <span class="input-label">Quarterly fixed costs</span>
+            <span class="br-val" id="fixed-costs">—</span>
           </div>
           <div class="input-row">
-            <span class="input-label">Revenue surplus / deficit</span>
-            <span class="br-val" id="surplus">—</span>
+            <span class="input-label">Trips needed to break even</span>
+            <span class="br-val positive" id="breakeven-trips">—</span>
           </div>
         </div>
       </div>
 
-    </div><!-- /tab-scenarios -->
+    </div>
 
-  </div><!-- /content -->
+  </div>
 
   <div class="footer">
-    Boomerang · Shared Asset Management · Estimates only — not financial advice
+    Boomerang · Shared Asset Management · Estimates only and not guaranteed returns
   </div>
 
 </div>
 
 <script>
-  // ── State ──
-  let months = 6;
-
-  // ── Utilities ──
   const $ = id => document.getElementById(id);
   const fmt = n => 'R ' + Math.round(n).toLocaleString('en-ZA');
-  const pct = n => (n * 100).toFixed(1) + '%';
+  const pct = n => (n * 100).toFixed(2) + '%';
   const fmtShort = n => {
     const abs = Math.abs(n);
     if (abs >= 1000000) return 'R ' + (n / 1000000).toFixed(1) + 'M';
@@ -903,91 +841,110 @@
     el.classList.add('update-flash');
   }
 
-  // ── Calc engine ──
   function getValues() {
     return {
-      invest:    +$('invest').value    || 0,
-      vehicle:   +$('vehicle').value   || 1,
-      fuel:      +$('fuel').value      || 0,
-      wages:     +$('wages').value     || 0,
+      invest: +$('invest').value || 0,
+      vehicle: +$('vehicle').value || 1,
+      trips: Math.max(+$('trips').value || 100, 100),
+      rate: +$('rate').value || 0,
+      fuelPerTrip: +$('fuelPerTrip').value || 0,
+      salaryPerTrip: +$('salaryPerTrip').value || 0,
       insurance: +$('insurance').value || 0,
-      premium:   +$('premium').value   || 0,
-      revenue:   +$('revenue').value   || 0,
-      tripsM:    +$('trips').value     || 1,
+      premium: +$('premium').value || 0,
+      other: +$('other').value || 0,
+      managementFee: (+$('managementFee').value || 0) / 100,
     };
   }
 
-  function calcScenario(v, revMult, expMult) {
+  function calcForTrips(v, tripCount) {
     const share = Math.min(v.invest / v.vehicle, 1);
-    const totalRev = v.revenue * revMult * months;
-    const totalExp = (v.fuel + v.wages + v.insurance + v.premium) * expMult * months;
-    const net = totalRev - totalExp;
-    const myReturn = net * share;
-    const roi = v.invest > 0 ? (myReturn / v.invest) * 100 : 0;
-    return { share, totalRev, totalExp, net, myReturn, roi };
+    const revenue = tripCount * v.rate;
+    const fuel = tripCount * v.fuelPerTrip;
+    const salary = tripCount * v.salaryPerTrip;
+    const fixedCosts = v.insurance + v.premium + v.other;
+    const totalCostsBeforeFee = fuel + salary + fixedCosts;
+    const profitBeforeFee = revenue - totalCostsBeforeFee;
+    const managementFeeAmount = Math.max(profitBeforeFee, 0) * v.managementFee;
+    const distributableProfit = profitBeforeFee - managementFeeAmount;
+    const investorReturn = distributableProfit * share;
+    const roi = v.invest > 0 ? (investorReturn / v.invest) * 100 : 0;
+
+    return {
+      share,
+      revenue,
+      fuel,
+      salary,
+      fixedCosts,
+      totalCostsBeforeFee,
+      profitBeforeFee,
+      managementFeeAmount,
+      distributableProfit,
+      investorReturn,
+      roi,
+      trips: tripCount,
+    };
   }
 
   function calc() {
     const v = getValues();
-    const base = calcScenario(v, 1, 1);
-    const totalFuel = v.fuel * months;
-    const totalWages = v.wages * months;
-    const totalInsurance = v.insurance * months;
-    const totalPremium = v.premium * months;
-    const totalTrips = v.tripsM * months;
+    const base = calcForTrips(v, v.trips);
 
-    // Results tab
-    $('period-badge').textContent = months + ' month' + (months > 1 ? 's' : '');
-    $('r-trips').textContent = totalTrips.toLocaleString('en-ZA');
+    if (+$('trips').value < 100) $('trips').value = 100;
+
+    $('r-trips').textContent = base.trips.toLocaleString('en-ZA');
     $('r-share').textContent = pct(base.share);
-    $('r-profit').textContent = fmtShort(base.net);
-    $('r-myshare').textContent = fmtShort(base.myReturn);
+    $('r-profit').textContent = fmtShort(base.distributableProfit);
+    $('r-myshare').textContent = fmtShort(base.investorReturn);
 
-    $('roi-amount').textContent = fmt(base.myReturn);
-    $('roi-pct').textContent = base.roi.toFixed(1) + '% ROI';
-    $('roi-sub').textContent = 'On R' + Math.round(v.invest).toLocaleString('en-ZA') + ' invested over ' + months + ' month' + (months > 1 ? 's' : '');
+    $('roi-amount').textContent = fmt(base.investorReturn);
+    $('roi-pct').textContent = base.roi.toFixed(2) + '% ROI';
+    $('roi-sub').textContent = 'On R' + Math.round(v.invest).toLocaleString('en-ZA') + ' invested into a R' + Math.round(v.vehicle).toLocaleString('en-ZA') + ' vehicle asset';
 
-    $('trips-note').textContent = v.tripsM + ' trips/month × ' + months + ' months = ' + totalTrips + ' total trips';
+    $('b-rev').textContent = fmt(base.revenue);
+    $('b-fuel').textContent = fmt(base.fuel);
+    $('b-salary').textContent = fmt(base.salary);
+    $('b-insurance').textContent = fmt(v.insurance);
+    $('b-premium').textContent = fmt(v.premium);
+    $('b-other').textContent = fmt(v.other);
+    $('b-before-fee').textContent = fmt(base.profitBeforeFee);
+    $('b-management').textContent = fmt(base.managementFeeAmount);
+    $('b-net').textContent = fmt(base.distributableProfit);
 
-    $('b-rev').textContent = fmt(base.totalRev);
-    $('b-fuel').textContent = fmt(totalFuel);
-    $('b-wages').textContent = fmt(totalWages);
-    $('b-insurance').textContent = fmt(totalInsurance);
-    $('b-premium').textContent = fmt(totalPremium);
-    $('b-net').textContent = fmt(base.net);
-    $('b-net').className = 'br-val ' + (base.net >= 0 ? 'positive' : 'negative');
+    $('b-before-fee').className = 'br-val ' + (base.profitBeforeFee >= 0 ? 'positive' : 'negative');
+    $('b-net').className = 'br-val ' + (base.distributableProfit >= 0 ? 'positive' : 'negative');
 
-    // Bar segments — show cost proportions as % of revenue
-    const rev = base.totalRev || 1;
-    $('bs-rev').style.width    = Math.max((base.totalRev / rev) * 100, 2).toFixed(1) + '%';
-    $('bs-fuel').style.width   = Math.max((totalFuel / rev) * 100, 1).toFixed(1) + '%';
-    $('bs-wages').style.width  = Math.max((totalWages / rev) * 100, 1).toFixed(1) + '%';
-    $('bs-ins').style.width    = Math.max((totalInsurance / rev) * 100, 1).toFixed(1) + '%';
-    $('bs-prem').style.width   = Math.max((totalPremium / rev) * 100, 1).toFixed(1) + '%';
+    $('formula-text').textContent =
+      `${base.trips} trips × R${v.rate} = ${fmt(base.revenue)} revenue\n` +
+      `${base.trips} trips × R${v.fuelPerTrip} = ${fmt(base.fuel)} fuel\n` +
+      `${base.trips} trips × R${v.salaryPerTrip} = ${fmt(base.salary)} salary\n` +
+      `Fixed costs = ${fmt(base.fixedCosts)}\n` +
+      `Profit before fee = ${fmt(base.profitBeforeFee)}\n` +
+      `Less ${Math.round(v.managementFee * 100)}% management fee = ${fmt(base.managementFeeAmount)}\n` +
+      `Distributable profit = ${fmt(base.distributableProfit)}\n` +
+      `Your share = ${pct(base.share)}\n` +
+      `Your estimated payout = ${fmt(base.investorReturn)}`;
 
-    // Scenarios tab
-    const low  = calcScenario(v, 0.8, 1.1);
-    const high = calcScenario(v, 1.2, 0.95);
+    const low = calcForTrips(v, 100);
+    const high = calcForTrips(v, v.trips + 50);
 
-    $('sc-low-ret').textContent  = fmtShort(low.myReturn);
-    $('sc-low-pct').textContent  = low.roi.toFixed(1) + '% ROI';
-    $('sc-base-ret').textContent = fmtShort(base.myReturn);
-    $('sc-base-pct').textContent = base.roi.toFixed(1) + '% ROI';
-    $('sc-high-ret').textContent = fmtShort(high.myReturn);
-    $('sc-high-pct').textContent = high.roi.toFixed(1) + '% ROI';
+    $('sc-low-ret').textContent = fmtShort(low.investorReturn);
+    $('sc-low-pct').textContent = low.roi.toFixed(2) + '% ROI';
+    $('sc-base-ret').textContent = fmtShort(base.investorReturn);
+    $('sc-base-pct').textContent = base.trips + ' trips';
+    $('sc-high-ret').textContent = fmtShort(high.investorReturn);
+    $('sc-high-pct').textContent = high.roi.toFixed(2) + '% ROI';
 
-    const monthlyExp = v.fuel + v.wages + v.insurance + v.premium;
-    const surplusVal = v.revenue - monthlyExp;
-    $('breakeven').textContent   = fmt(monthlyExp);
-    $('total-expenses').textContent = fmt(monthlyExp);
-    $('surplus').textContent     = fmt(surplusVal);
-    $('surplus').className       = 'br-val ' + (surplusVal >= 0 ? 'positive' : 'negative');
+    const costPerTrip = v.fuelPerTrip + v.salaryPerTrip;
+    const marginPerTrip = v.rate - costPerTrip;
+    const breakEvenTrips = marginPerTrip > 0 ? Math.ceil(base.fixedCosts / marginPerTrip) : 0;
 
-    // Flash results
+    $('cost-per-trip').textContent = fmt(costPerTrip);
+    $('fixed-costs').textContent = fmt(base.fixedCosts);
+    $('breakeven-trips').textContent = marginPerTrip > 0 ? breakEvenTrips + ' trips' : 'Not possible';
+
     ['roi-amount','r-profit','r-myshare'].forEach(id => flash($(id)));
   }
 
-  // ── Tab switching ──
   function switchTab(name) {
     document.querySelectorAll('.tab-btn').forEach((b, i) => {
       const tabs = ['inputs', 'results', 'scenarios'];
@@ -996,25 +953,13 @@
     document.querySelectorAll('.tab-panel').forEach(p => {
       p.classList.toggle('active', p.id === 'tab-' + name);
     });
-    if (name !== 'inputs') calc();
+    calc();
   }
 
-  // ── Time buttons ──
-  document.querySelectorAll('.time-btn[data-m]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.time-btn[data-m]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      months = +btn.dataset.m;
-      calc();
-    });
-  });
-
-  // ── Input listeners ──
-  ['invest','vehicle','fuel','wages','insurance','premium','revenue','trips'].forEach(id => {
+  ['invest','vehicle','trips','rate','fuelPerTrip','salaryPerTrip','insurance','premium','other','managementFee'].forEach(id => {
     $(id).addEventListener('input', calc);
   });
 
-  // ── Init ──
   calc();
 </script>
 </body>
